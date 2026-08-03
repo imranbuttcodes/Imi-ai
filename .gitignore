@@ -1,0 +1,43 @@
+# ==============================================================
+# Nexus AI — .gitignore
+# ==============================================================
+
+# Environment
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.egg-info/
+dist/
+build/
+
+# Virtual Environments
+venv/
+.venv/
+env/
+
+# Data (not tracked in git)
+data/chroma/
+data/memory/
+data/uploads/
+data/documents/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Tests
+.pytest_cache/
+.coverage
+htmlcov/
