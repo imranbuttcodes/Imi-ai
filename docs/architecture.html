@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Nexus AI Technical Architecture</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; margin: 0; height: 100vh; background-color: #0d1117; color: #c9d1d9; }
+        #graph-container { flex: 2; padding: 20px; overflow: auto; border-right: 1px solid #30363d; }
+        #details-panel { flex: 1; padding: 30px; background-color: #161b22; overflow-y: auto; box-shadow: -5px 0 15px rgba(0,0,0,0.5); }
+        h1, h2, h3 { color: #58a6ff; }
+        .node { cursor: pointer !important; }
+        .code-block { background-color: #0d1117; padding: 15px; border-radius: 6px; font-family: monospace; color: #79c0ff; border: 1px solid #30363d;}
+        .tag { display: inline-block; padding: 6px 12px; border-radius: 20px; font-size: 13px; font-weight: bold; margin-right: 5px; background-color: #238636; color: white;}
+        .desc-text { line-height: 1.6; margin-top: 20px; font-size: 16px; color: #8b949e; }
+    </style>
+</head>
+<body>
+    <div id="graph-container">
+        <h2>Interactive Flow (Click Nodes for Technical Details)</h2>
+        <div class="mermaid" id="mermaid-graph">
+            graph TD
+            %% Master Graph
+            User([User Input: terminal / app.py]) --> MainAI{Main AI Router}
+            
+            MainAI -->|route_request: agent_knowledge| KnowledgeAgent[Knowledge Agent]
+            MainAI -->|route_request: agent_research| ResearchAgent[Research Agent]
+            MainAI -->|route_request: END| EndOutput([Direct Response])
+            
+            %% Knowledge Agent
+            subgraph Knowledge Subgraph
+                KnowledgeAgent --> retrieveNode[nodes.py: retrieve_node]
+                retrieveNode --> CRAG[CRAG Pipeline]
+                retrieveNode --> SelfRAG[Self-RAG Pipeline]
+            end
+            
+            %% CRAG
+            subgraph CRAG Internal Pipeline
+                CRAG --> crag_retrieve[crag.py: retrieve_node]
+                crag_retrieve --> crag_eval[crag.py: eval_each_doc]
+                
+                crag_eval -->|All Irrelevant| crag_rewrite[crag.py: rewrite_query]
+                crag_rewrite --> crag_search[crag.py: web_search_node]
+                crag_search --> crag_refine[crag.py: refine_node]
+                
+                crag_eval -->|Has Relevant Docs| crag_refine
+            end
+            
+            %% Research Agent
+            subgraph Research Subgraph
+                ResearchAgent --> res_plan[nodes.py: plan_node]
+                res_plan --> res_search[nodes.py: search_node]
+                res_search --> res_report[nodes.py: report_node]
+            end
+            
+            %% Callbacks
+            click MainAI "javascript:window.showDetails('MainAI')" "View Technical Details"
+            click KnowledgeAgent "javascript:window.showDetails('KnowledgeAgent')" "View Technical Details"
+            click ResearchAgent "javascript:window.showDetails('ResearchAgent')" "View Technical Details"
+            click CRAG "javascript:window.showDetails('CRAG')" "View Technical Details"
+            click crag_retrieve "javascript:window.showDetails('crag_retrieve')" "View Technical Details"
+            click crag_eval "javascript:window.showDetails('crag_eval')" "View Technical Details"
+            click crag_rewrite "javascript:window.showDetails('crag_rewrite')" "View Technical Details"
+            click crag_search "javascript:window.showDetails('crag_search')" "View Technical Details"
+            click crag_refine "javascript:window.showDetails('crag_refine')" "View Technical Details"
+            click res_plan "javascript:window.showDetails('res_plan')" "View Technical Details"
+            click res_search "javascript:window.showDetails('res_search')" "View Technical Details"
+            click res_report "javascript:window.showDetails('res_report')" "View Technical Details"
+        </div>
+    </div>
+    
+    <div id="details-panel">
+        <h2>Component Details</h2>
+        <p style="color: #8b949e;">Click on any node in the flowchart to see the exact files, classes, and Python functions that execute it.</p>
+        <div id="content"></div>
+    </div>
+
+    <!-- Load Mermaid -->
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark', securityLevel: 'loose' });
+        
+        const details = {
+            MainAI: {
+                title: "Main AI Router",
+                file: "core/main_ai.py",
+                func: "def main_ai_node(state: NexusState)",
+                desc: "The entry point of the Master Graph. It dynamically calls AgentRegistry.list_all() to inject descriptions of all registered agents into the system prompt. It uses an LLM with structured output to decide the routing target."
+            },
+            KnowledgeAgent: {
+                title: "Knowledge Agent",
+                file: "agents/knowledge/agent.py",
+                func: "class KnowledgeAgent(BaseAgent)",
+                desc: "Wraps the internal knowledge subgraph. It transforms the global NexusState into a private KnowledgeState, invokes its internal StateGraph, and maps the final answer back to NexusState."
+            },
+            ResearchAgent: {
+                title: "Research Agent",
+                file: "agents/research/agent.py",
+                func: "class ResearchAgent(BaseAgent)",
+                desc: "Wraps the deep-web research subgraph. Registered automatically on boot via discover_agents()."
+            },
+            CRAG: {
+                title: "CRAG Engine Wrapper",
+                file: "infrastructure/retrieval/crag.py",
+                func: "def run_crag(query: str)",
+                desc: "Compiles and executes the Corrective RAG LangGraph state machine. Called dynamically by agents/knowledge/nodes.py based on the .env RAG_STRATEGY."
+            },
+            crag_retrieve: {
+                title: "CRAG: Retrieve",
+                file: "infrastructure/retrieval/crag.py",
+                func: "def retrieve_node(state: CRAGState)",
+                desc: "Uses infrastructure/retrieval/vector_store.py to get the EnsembleRetriever (ChromaDB semantic + BM25 keyword) and pulls the top raw document chunks into state."
+            },
+            crag_eval: {
+                title: "CRAG: Evaluate Documents",
+                file: "infrastructure/retrieval/crag.py",
+                func: "def eval_each_doc(state: CRAGState)",
+                desc: "Uses an LLM paired with the KeepOrDrop Pydantic schema to strictly grade every single retrieved chunk. Sets the state to trigger web fallback if all docs fail."
+            },
+            crag_rewrite: {
+                title: "CRAG: Rewrite Query",
+                file: "infrastructure/retrieval/crag.py",
+                func: "def rewrite_query(state: CRAGState)",
+                desc: "An LLM node that rewrites the original user question into an optimized Google search query string."
+            },
+            crag_search: {
+                title: "CRAG: Web Search",
+                file: "infrastructure/retrieval/crag.py",
+                func: "def web_search_node(state: CRAGState)",
+                desc: "Executes a live web search using the Tavily API to salvage the conversation when local DB documents fail."
+            },
+            crag_refine: {
+                title: "CRAG: Refine Answer",
+                file: "infrastructure/retrieval/crag.py",
+                func: "def refine_node(state: CRAGState)",
+                desc: "Takes the validated local chunks (or the web results), tokenizes them into exact sentences using NLTK, strips irrelevant sentences, and generates a final answer with strict [Source] citations."
+            },
+            res_plan: {
+                title: "Research: Plan Node",
+                file: "agents/research/nodes.py",
+                func: "def plan_node(state: ResearchState)",
+                desc: "Uses an LLM to generate a structured SearchPlan (Pydantic list of strings) containing 2-3 highly targeted Google queries."
+            },
+            res_search: {
+                title: "Research: Search Node",
+                file: "agents/research/nodes.py",
+                func: "def search_node(state: ResearchState)",
+                desc: "Iterates over the planned queries and executes them via TavilySearch, accumulating raw text results and citations into the state list."
+            },
+            res_report: {
+                title: "Research: Report Node",
+                file: "agents/research/nodes.py",
+                func: "def report_node(state: ResearchState)",
+                desc: "Synthesizes the massive amount of raw web data into a comprehensive, formatted markdown report with citations."
+            }
+        };
+
+        // Attach function to global window so mermaid clicks can trigger it
+        window.showDetails = function(nodeId) {
+            const data = details[nodeId];
+            if(!data) return;
+            document.getElementById('content').innerHTML = `
+                <h3>${data.title}</h3>
+                <span class="tag">File: ${data.file}</span><br><br>
+                <div class="code-block">${data.func}</div>
+                <p class="desc-text">${data.desc}</p>
+            `;
+        }
+    </script>
+</body>
+</html>

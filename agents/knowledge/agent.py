@@ -14,10 +14,11 @@
 from agents.base import BaseAgent
 from agents.knowledge.graph import build_knowledge_graph
 from core.state import NexusState
+from core.constants import AgentName
 
 
 class KnowledgeAgent(BaseAgent):
-    name         = "knowledge"
+    name         = AgentName.KNOWLEDGE
     description  = "Answers questions from your private documents and internal knowledge base using RAG."
     capabilities = ["rag", "document-qa", "knowledge-retrieval"]
 

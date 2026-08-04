@@ -5,10 +5,11 @@
 from agents.base import BaseAgent
 from agents.research.graph import build_research_graph
 from core.state import NexusState
+from core.constants import AgentName
 
 
 class ResearchAgent(BaseAgent):
-    name         = "research"
+    name         = AgentName.RESEARCH
     description  = "Performs deep web research by breaking down complex queries and synthesizing a detailed report from live internet data."
     capabilities = ["web-search", "deep-research", "live-data"]
 

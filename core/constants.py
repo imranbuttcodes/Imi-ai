@@ -16,7 +16,7 @@ class AgentName:
     RESEARCH  = "research"
     # Add future agents here:
     # CODING    = "coding"
-    # FILESYSTEM = "filesystem"
+    FILESYSTEM = "filesystem"
 
 
 class Routing:

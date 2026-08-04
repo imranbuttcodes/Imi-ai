@@ -18,3 +18,4 @@ langchain_community
 langchain_text_splitters
 pypdf
 rank_bm25
+langchain-mcp-adapters
