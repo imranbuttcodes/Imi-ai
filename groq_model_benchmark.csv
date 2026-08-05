@@ -1,0 +1,20 @@
+model,status,speed,reply
+groq/compound,PASS,1.1842083930969238,Success
+allam-2-7b,PASS,0.1577615737915039,Excellent!
+canopylabs/orpheus-arabic-saudi,FAIL,,"Error code: 400 - {'error': {'message': 'The model `canopylabs/orpheus-arabic-saudi` requires terms acceptance. Please have the org admin accept the terms at https://console.groq.com/playground?model=canopylabs%2Forpheus-arabic-saudi', 'type': 'invalid_request_error', 'code': 'model_terms_required'}}"
+llama-3.3-70b-versatile,PASS,0.2676575183868408,Success
+qwen/qwen3.6-27b,PASS,0.2019517421722412,"<think>
+Here's a thinking process:
+
+1.  **Analyze User Input:**
+   - User"
+openai/gpt-oss-120b,PASS,0.44208383560180664,
+meta-llama/llama-prompt-guard-2-86m,PASS,0.2155628204345703,0.0004137613868806511
+llama-3.1-8b-instant,PASS,0.17525053024291992,Achieved
+meta-llama/llama-prompt-guard-2-22m,PASS,0.2312331199645996,0.0008483838755637407
+canopylabs/orpheus-v1-english,FAIL,,"Error code: 400 - {'error': {'message': 'The model `canopylabs/orpheus-v1-english` requires terms acceptance. Please have the org admin accept the terms at https://console.groq.com/playground?model=canopylabs%2Forpheus-v1-english', 'type': 'invalid_request_error', 'code': 'model_terms_required'}}"
+openai/gpt-oss-20b,PASS,0.8193647861480713,
+groq/compound-mini,PASS,0.6482241153717041,Success
+whisper-large-v3-turbo,FAIL,,"Error code: 400 - {'error': {'message': 'The model `whisper-large-v3-turbo` does not support chat completions', 'type': 'invalid_request_error'}}"
+whisper-large-v3,FAIL,,"Error code: 400 - {'error': {'message': 'The model `whisper-large-v3` does not support chat completions', 'type': 'invalid_request_error'}}"
+openai/gpt-oss-safeguard-20b,PASS,0.45436835289001465,

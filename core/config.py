@@ -44,6 +44,7 @@ class Settings(BaseSettings):
     # --- App Settings ---
     app_name:    str = Field(default="Nexus AI", alias="APP_NAME")
     debug:      bool = Field(default=False,      alias="DEBUG")
+    memory_dir:  str = Field(default="data/memory", alias="MEMORY_DIR")
 
     # --- MCP Settings ---
     mcp_filesystem_allowed_dirs: str = Field(default="D:\\", alias="MCP_FILESYSTEM_ALLOWED_DIRS")

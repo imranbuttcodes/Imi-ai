@@ -19,19 +19,82 @@
 
 from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
+from langchain_openai import ChatOpenAI
+from langchain_groq import ChatGroq
+from langchain_huggingface import HuggingFaceEndpoint, ChatHuggingFace
 from core.config import settings
+import os
+from dotenv import load_dotenv
 
-def get_llm(model: str | None = None, provider: str | None = None) -> BaseChatModel:
+
+load_dotenv()
+
+
+def get_llm(role: str = "default", model: str | None = None, provider: str | None = None) -> BaseChatModel:
     """
-    Returns a LangChain-compatible chat model instance.
+    Returns a LangChain-compatible chat model instance based on its role in the system.
     """
+    # Pure Speed & Smarter JSON classification
+    if role == "router":
+        # return ChatGroq(
+        #     model="llama-3.3-70b-versatile",   # 
+        #     api_key=os.getenv('GROQ_API_KEY', 'MISSING_KEY')
+        # )
+
+        hf_llm = HuggingFaceEndpoint(
+            repo_id="Qwen/Qwen2.5-7B-Instruct",
+            task="text-generation",
+            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN")
+        )
+        return ChatHuggingFace(llm=hf_llm)
+          
+        #  return ChatOpenAI(
+        #              model="openrouter/free",
+        #              base_url="https://openrouter.ai/api/v1",
+        #              api_key=os.getenv('OPENROUTER_API_KEY', 'MISSING_KEY')
+        #          )
+        
+    # Heavy Tool Calling & Coding
+    elif role == "specialist":
+        hf_llm = HuggingFaceEndpoint(
+            repo_id="Qwen/Qwen2.5-7B-Instruct",
+            task="text-generation",
+            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN")
+        )
+        return ChatHuggingFace(llm=hf_llm)
+        # or use this 
+
+        # return ChatOpenAI(
+        #     model="meta-llama/llama-4-maverick",
+        #     api_key=os.getenv("OPENROUTER_API_KEY"),
+        #     base_url="https://openrouter.ai/api/v1",
+        # )
+
+    # 3. CRAG & Self-RAG Evaluators (0.20s) - Extremely logical and fast document grading
+    elif role == "evaluator":
+        return ChatGroq(
+            model="qwen/qwen3.6-27b",
+            api_key=os.getenv('GROQ_API_KEY', 'MISSING_KEY')
+        )
+        
+    # 4. Security Guardrails (0.22s) - Checks for prompt injection/jailbreaks
+    elif role == "guardrail":
+        return ChatGroq(
+            model="meta-llama/llama-prompt-guard-2-86m",
+            api_key=os.getenv('GROQ_API_KEY', 'MISSING_KEY')
+        )
+
+    # 5. Background Memory Summarizer
+    elif role == "memory":
+        hf_llm = HuggingFaceEndpoint(
+            repo_id="Qwen/Qwen2.5-7B-Instruct",
+            task="text-generation",
+            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN")
+        )
+        return ChatHuggingFace(llm=hf_llm)
+        
+    # 6. Fallback (For manual Overrides)
     _model = model or settings.default_model
-
     if ":" in _model:
         return init_chat_model(_model)
-
-    _provider = provider or settings.default_provider
-    return init_chat_model(
-        _model, 
-        model_provider=_provider
-    )
+    return init_chat_model(_model, model_provider=provider or settings.default_provider)

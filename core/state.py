@@ -16,13 +16,14 @@
 #   metadata       → optional, set by anyone
 # ==============================================================
 
-from typing import TypedDict, Any
+from typing import TypedDict, Any, Annotated
+from langgraph.graph.message import add_messages
+from langchain_core.messages import AnyMessage
 
 
 class NexusState(TypedDict):
     query:          str               # Original user query
-    next_agent:     str               # Routing decision: agent name, "END", or "fallback"
-    agent_outputs:  dict[str, str]    # {"knowledge": "...", "research": "..."}
-    final_response: str               # The final answer shown to the user
+    messages:       Annotated[list[AnyMessage], add_messages] # Thread history
+    summary:        str               # The rolling conversation summary
     errors:         list[str]         # Errors from any agent
     metadata:       dict[str, Any]    # Optional extra data (timestamps, tokens used, etc.)

@@ -9,7 +9,8 @@ def build_filesystem_graph(tools):
     Builds the tool-calling StateGraph for the FileSystem MCP Agent.
     It takes the async MCP tools injected from the Agent's event loop session.
     """
-    llm = get_llm()
+    # Retrieve the specialist LLM and bind our MCP filesystem tools to it
+    llm = get_llm(role="specialist")
     llm_with_tools = llm.bind_tools(tools)
     
     async def agent_node(state: FileSystemState):
@@ -40,7 +41,7 @@ def build_filesystem_graph(tools):
     # Flow: START -> agent <---> tools -> END
     graph.add_edge(START, "agent")
     graph.add_conditional_edges("agent", tools_condition)
-    graph.add_edge("tools", "   ")
+    graph.add_edge("tools", "agent")
     
     # Must use a checkpointer to support interrupt() state preservation
     return graph.compile(checkpointer=MemorySaver())

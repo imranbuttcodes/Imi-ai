@@ -43,11 +43,12 @@ class KnowledgeAgent(BaseAgent):
 
         # ── Run Internal Graph ─────────────────────────────────
         result = self._graph.invoke(agent_state)
+        final_answer = result["answer"]
 
-        # ── Output Transform ───────────────────────────────────
+        # ── Output Transform        # 7. Return the partial state update
         return {
             "agent_outputs": {
-                self.name: result["answer"]
+                self.name: final_answer
             }
         }
 

@@ -66,7 +66,7 @@ def answer_node(state: KnowledgeState) -> dict:
     query   = state["query"]
     context = "\n\n".join(chunks) if chunks else "No context available."
 
-    llm      = get_llm()
+    llm      = get_llm(role="specialist")
     chain    = ANSWER_PROMPT | llm
     response = chain.invoke({"context": context, "query": query})
 

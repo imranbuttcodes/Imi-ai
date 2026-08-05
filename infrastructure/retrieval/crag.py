@@ -18,6 +18,8 @@ import os
 from typing import List, TypedDict
 from pydantic import BaseModel, Field
 from langchain_core.documents import Document
+from langsmith import traceable
+from langchain.prompts import PromptTemplate
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, START, END
 
@@ -86,13 +88,14 @@ answer_prompt = ChatPromptTemplate.from_messages([
 
 
 # ── Nodes ──────────────────────────────────────────────────────
+@traceable(run_type="retriever", name="CRAG_RetrieveNode", metadata={"layer": "retrieval", "source": "tavily_search"})
 def retrieve_node(state: CRAGState) -> dict:
     retriever = get_retriever()
     return {"docs": retriever.invoke(state["question"])}
 
 
 def eval_each_doc_node(state: CRAGState) -> dict:
-    eval_llm   = get_llm(settings.eval_model)
+    eval_llm   = get_llm(role="evaluator")
     eval_chain = eval_prompt | eval_llm.with_structured_output(DocScoreSchema)
 
     scores, good_docs = [], []
@@ -115,7 +118,7 @@ def eval_each_doc_node(state: CRAGState) -> dict:
 
 
 def rewrite_query_node(state: CRAGState) -> dict:
-    rewrite_llm   = get_llm(settings.eval_model)
+    rewrite_llm   = get_llm(role="evaluator")
     rewrite_chain = rewrite_prompt | rewrite_llm.with_structured_output(WebQuery)
     web_query = rewrite_chain.invoke({"question": state["question"]}).query
     return {"web_query": web_query}
@@ -138,7 +141,7 @@ def web_search_node(state: CRAGState) -> dict:
 
 
 def refine_node(state: CRAGState) -> dict:
-    filter_llm   = get_llm(settings.eval_model)
+    filter_llm   = get_llm(role="evaluator")
     filter_chain = filter_prompt | filter_llm.with_structured_output(KeepOrDrop)
 
     verdict = state.get("VERDICT")

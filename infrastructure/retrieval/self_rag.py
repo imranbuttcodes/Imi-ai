@@ -17,6 +17,7 @@
 from typing import List, Literal, TypedDict
 from pydantic import BaseModel, Field
 from langchain_core.documents import Document
+from langsmith import traceable
 from langchain_core.prompts import ChatPromptTemplate
 from langgraph.graph import StateGraph, START, END
 
@@ -125,19 +126,20 @@ rewrite_for_retrieval_prompt = ChatPromptTemplate.from_messages([
 
 # ── Nodes ──────────────────────────────────────────────────────
 def should_retriever_node(state: SelfRAGState) -> dict:
-    llm   = get_llm(settings.eval_model)
+    llm   = get_llm(role="evaluator")
     chain = decide_retrieval_prompt | llm.with_structured_output(ShouldRetrieve)
     result = chain.invoke({"question": state["question"]})
     return {"need_retrieval": result.should_retrieve == "yes"}
 
 
 def generate_direct(state: SelfRAGState) -> dict:
-    llm   = get_llm(settings.gen_model)
+    llm   = get_llm(role="specialist")
     chain = direct_gen_prompt | llm
     out   = chain.invoke({"question": state["question"]})
     return {"answer": out.content}
 
 
+@traceable(run_type="retriever", name="SelfRAG_RetrieveNode", metadata={"layer": "retrieval", "source": "tavily_search"})
 def retrieve_node(state: SelfRAGState) -> dict:
     retriever = get_retriever()
     query     = state.get("retrieval_query") or state["question"]
@@ -145,7 +147,7 @@ def retrieve_node(state: SelfRAGState) -> dict:
 
 
 def is_relevant_node(state: SelfRAGState) -> dict:
-    llm   = get_llm(settings.eval_model)
+    llm   = get_llm(role="evaluator")
     chain = llm.with_structured_output(RelevanceDecision)
     relevant_docs = []
     for doc in state["docs"]:
@@ -168,7 +170,7 @@ def generate_from_context(state: SelfRAGState) -> dict:
     context = "\n\n---\n\n".join(chunks).strip()
     if not context:
         return {"answer": "No relevant document found.", "context": ""}
-    llm   = get_llm(settings.gen_model)
+    llm   = get_llm(role="specialist")
     chain = rag_gen_prompt | llm
     out   = chain.invoke({"question": state["question"], "context": context})
     return {"answer": out.content, "context": context}
@@ -183,7 +185,7 @@ def no_answer_found(state: SelfRAGState) -> dict:
 
 
 def is_sup_node(state: SelfRAGState) -> dict:
-    llm   = get_llm(settings.eval_model)
+    llm   = get_llm(role="evaluator")
     chain = issup_prompt | llm.with_structured_output(IsSUPDecision)
     result = chain.invoke({
         "question": state["question"],
@@ -194,7 +196,7 @@ def is_sup_node(state: SelfRAGState) -> dict:
 
 
 def revise_answer(state: SelfRAGState) -> dict:
-    llm   = get_llm(settings.gen_model)
+    llm   = get_llm(role="specialist")
     chain = revise_prompt | llm
     out   = chain.invoke({
         "question": state["question"],
@@ -205,14 +207,14 @@ def revise_answer(state: SelfRAGState) -> dict:
 
 
 def is_use_node(state: SelfRAGState) -> dict:
-    llm   = get_llm(settings.eval_model)
+    llm   = get_llm(role="evaluator")
     chain = isuse_prompt | llm.with_structured_output(IsUSEDecision)
     result = chain.invoke({"question": state["question"], "answer": state.get("answer", "")})
     return {"isuse": result.isuse, "use_reason": result.reason}
 
 
 def rewrite_question(state: SelfRAGState) -> dict:
-    llm   = get_llm(settings.eval_model)
+    llm   = get_llm(role="evaluator")
     chain = rewrite_for_retrieval_prompt | llm.with_structured_output(RewriteDecision)
     result = chain.invoke({
         "question":       state["question"],

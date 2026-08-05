@@ -10,7 +10,7 @@ from core.config import settings
 
 def plan_node(state: ResearchState) -> dict:
     """Uses the LLM to break the query into search queries."""
-    llm = get_llm(settings.eval_model)
+    llm = get_llm(role="evaluator")
     chain = PLANNING_PROMPT | llm.with_structured_output(SearchPlan)
     
     plan = chain.invoke({"query": state["query"]})
@@ -47,7 +47,7 @@ def report_node(state: ResearchState) -> dict:
     chunks = state.get("search_results", [])
     context = "\n\n---\n\n".join(chunks) if chunks else "No search results found."
     
-    llm = get_llm(settings.gen_model)
+    llm = get_llm(role="specialist")
     chain = REPORT_PROMPT | llm
     
     response = chain.invoke({

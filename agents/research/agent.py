@@ -30,6 +30,7 @@ class ResearchAgent(BaseAgent):
 
         result = self._graph.invoke(agent_state)
 
+        # ── Output Transform ───────────────────────────────────
         return {
             "agent_outputs": {
                 self.name: result["report"]

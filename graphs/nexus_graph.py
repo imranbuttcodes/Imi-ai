@@ -10,19 +10,35 @@
 # ==============================================================
 
 from langgraph.graph import StateGraph, START, END
+from langgraph.prebuilt import ToolNode
 from core.state import NexusState
-from core.main_ai import main_ai_node
-from core.router import route_request
-from core.registry import registry, discover_agents
+from core.main_ai import main_ai_node, build_agent_tools
+from core.registry import discover_agents
+
+def route_after_main(state: NexusState) -> str:
+    """
+    Decides whether to route to the Tools node or finish the turn.
+    """
+    messages = state.get("messages", [])
+    if not messages:
+        return "summarize"
+    
+    last_message = messages[-1]
+    # If the LLM made a tool call, route to the tools node
+    if hasattr(last_message, "tool_calls") and last_message.tool_calls:
+        return "tools"
+        
+    # Otherwise, the LLM has responded to the user, so summarize and end
+    return "summarize"
 
 
 def build_master_graph():
     """
-    Builds the master LangGraph dynamically based on registered agents.
+    Builds the master LangGraph using a ReAct Orchestrator loop.
     
     Flow:
-        START → main_ai_node → route_request → [Specialist Agent] → END
-                                             → END (direct answer)
+        START → main_ai_node ↔ tools (Specialist Agents)
+                             ↳ summarize → END
     """
     # 1. Ensure all agents are loaded into the registry first
     discover_agents()
@@ -30,35 +46,38 @@ def build_master_graph():
     # 2. Initialize the master graph state
     graph = StateGraph(NexusState)
 
-    # 3. Add the Main AI (the front door)
+    # 3. Add the Main AI (the ReAct Orchestrator)
     graph.add_node("main_ai", main_ai_node)
     graph.add_edge(START, "main_ai")
 
-    # 4. Dynamically add a node for every registered agent
-    all_agents = registry.list_all()
-    agent_names = []
-    
-    for entry in all_agents:
-        agent_name = entry.name
-        # Note: We pass the agent's run method as the node function
-        graph.add_node(agent_name, entry.agent.run)
-        
-        # After any specialist agent finishes, the graph ends
-        graph.add_edge(agent_name, END)
-        
-        agent_names.append(agent_name)
+    # 4. Add the Tools Node (Wraps all Specialist Agents)
+    tools = build_agent_tools()
+    if tools:
+        graph.add_node("tools", ToolNode(tools))
+        # After executing tools, always loop back to the Main AI to reason again
+        graph.add_edge("tools", "main_ai")
 
-    # 5. Build the conditional routing map
-    # Maps what the router returns (string) to the actual node name
-    route_map = {name: name for name in agent_names}
-    route_map[END] = END  # Handle direct answers
+    # 5. Add the Summarizer Node (Context Guard)
+    from infrastructure.memory.summarizer import summarize_node
+    graph.add_node("summarize", summarize_node)
+    graph.add_edge("summarize", END)
 
-    # 6. Add the conditional edges from Main AI
+    # 6. Add the conditional routing from Main AI
     graph.add_conditional_edges(
-        "main_ai",          # The node we are routing FROM
-        route_request,      # The function that decides where to go
-        route_map           # The dictionary mapping choices to nodes
+        "main_ai",          
+        route_after_main,   
+        {"tools": "tools", "summarize": "summarize"} if tools else {"summarize": "summarize"}
     )
 
-    # Compile and return the executable application
-    return graph.compile()
+    # Compile with SQLite persistent checkpointer
+    import sqlite3
+    import os
+    from core.config import settings
+    from langgraph.checkpoint.sqlite import SqliteSaver
+    
+    os.makedirs(settings.memory_dir, exist_ok=True)
+    working_db_path = os.path.join(settings.memory_dir, "nexus_working.db")
+    conn = sqlite3.connect(working_db_path, check_same_thread=False)
+    checkpointer = SqliteSaver(conn)
+    
+    return graph.compile(checkpointer=checkpointer)

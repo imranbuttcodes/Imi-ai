@@ -101,7 +101,7 @@ class FileSystemAgent(BaseAgent):
         return {
             "agent_outputs": {
                 self.name: final_message
-            } 
+            }
         }
 
 # Auto-registration when discover_agents() imports this file
