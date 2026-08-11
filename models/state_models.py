@@ -1,2 +1,2 @@
-﻿# State Models
-# TODO: Shared Pydantic models for NexusState
+# State Models
+# TODO: Shared Pydantic models for ImiState

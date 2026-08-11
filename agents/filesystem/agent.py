@@ -26,14 +26,14 @@ class FileSystemAgent(BaseAgent):
     def __init__(self):
         super().__init__()
         
-    def run(self, nexus_state: dict[str, Any]) -> dict[str, Any]:
+    def run(self, imi_state: dict[str, Any]) -> dict[str, Any]:
         """
         The Master Graph calls this synchronous run method.
         We spawn an asyncio event loop to handle the MCP background process lifecycle.
         """
-        return asyncio.run(self._arun(nexus_state))
+        return asyncio.run(self._arun(imi_state))
         
-    async def _arun(self, nexus_state: dict[str, Any]) -> dict[str, Any]:
+    async def _arun(self, imi_state: dict[str, Any]) -> dict[str, Any]:
         """
         Maintains the MCP server connection open for the entire duration of the
         tool-calling graph, ensuring tools execute properly when requested.
@@ -65,8 +65,8 @@ class FileSystemAgent(BaseAgent):
         
         # Construct the initial state
         agent_state = {
-            "query": nexus_state["query"],
-            "messages": [("user", nexus_state["query"])]
+            "query": imi_state["query"],
+            "messages": [("user", imi_state["query"])]
         }
         
         # Run the graph until completion or until it hits an interrupt()

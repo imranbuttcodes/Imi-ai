@@ -4,7 +4,7 @@
 # Every agent in the system MUST inherit from BaseAgent.
 # This enforces the contract:
 #   - Define: name, description, capabilities
-#   - Implement: run(nexus_state) -> dict
+#   - Implement: run(imi_state) -> dict
 #   - Registration happens automatically on __init__
 #
 # Usage (in any agent):
@@ -15,18 +15,18 @@
 #       description  = "Searches your private documents."
 #       capabilities = ["rag", "document-qa"]
 #
-#       def run(self, nexus_state):
+#       def run(self, imi_state):
 #           ...
 # ==============================================================
 
 from abc import ABC, abstractmethod
 from core.registry import registry
-from core.state import NexusState
+from core.state import ImiState
 
 
 class BaseAgent(ABC):
     """
-    Abstract base class that every Nexus AI agent must inherit from.
+    Abstract base class that every Imi AI agent must inherit from.
 
     Responsibilities:
     - Enforces that every agent has a run() method (via ABC).
@@ -56,16 +56,14 @@ class BaseAgent(ABC):
         )
 
     @abstractmethod
-    def run(self, nexus_state: NexusState) -> dict:
+    def run(self, imi_state: ImiState) -> dict:
         """
-        The main entry point called by the master graph.
-
-        Every agent MUST implement this method. It receives the
-        full NexusState, does its specialist work, and returns
-        a partial state update dict.
+        Main execution method for the agent.
+        Takes the full master graph state, executes specialist tasks,
+        and returns a partial state update dictionary.
 
         Args:
-            nexus_state: The current master graph state.
+            imi_state: The current master graph state.
 
         Returns:
             A dict with the fields this agent updated.

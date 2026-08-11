@@ -24,18 +24,26 @@ def get_embeddings(provider: str | None = None) -> Embeddings:
     _provider = provider or settings.embedding_provider
 
     if _provider == "cohere":
-        from langchain_cohere import CohereEmbeddings
-        return CohereEmbeddings(
-            model="embed-english-v3.0",
-            cohere_api_key=settings.cohere_api_key
-        )
+        try:
+            from langchain_cohere import CohereEmbeddings
+            return CohereEmbeddings(
+                model="embed-english-v3.0",
+                cohere_api_key=settings.cohere_api_key
+            )
+        except (ImportError, ModuleNotFoundError):
+            print("[Embeddings Warning] 'langchain_cohere' not installed. Falling back to HuggingFace Embeddings.")
+            _provider = "huggingface"
 
     if _provider == "openai":
-        from langchain_openai import OpenAIEmbeddings
-        return OpenAIEmbeddings(
-            model="text-embedding-3-small",
-            api_key=settings.openai_api_key
-        )
+        try:
+            from langchain_openai import OpenAIEmbeddings
+            return OpenAIEmbeddings(
+                model="text-embedding-3-small",
+                api_key=settings.openai_api_key
+            )
+        except (ImportError, ModuleNotFoundError):
+            print("[Embeddings Warning] 'langchain_openai' not installed. Falling back to HuggingFace Embeddings.")
+            _provider = "huggingface"
 
     if _provider == "huggingface":
         from langchain_huggingface import HuggingFaceEmbeddings

@@ -42,7 +42,7 @@ class Settings(BaseSettings):
     tavily_api_key: str = Field(default="",                         alias="TAVILY_API_KEY")
 
     # --- App Settings ---
-    app_name:    str = Field(default="Nexus AI", alias="APP_NAME")
+    app_name:    str = Field(default="Imi AI", alias="APP_NAME")
     debug:      bool = Field(default=False,      alias="DEBUG")
     memory_dir:  str = Field(default="data/memory", alias="MEMORY_DIR")
 

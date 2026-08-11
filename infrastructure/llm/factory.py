@@ -41,27 +41,35 @@ def get_llm(role: str = "default", model: str | None = None, provider: str | Non
         #     api_key=os.getenv('GROQ_API_KEY', 'MISSING_KEY')
         # )
 
-        hf_llm = HuggingFaceEndpoint(
-            repo_id="Qwen/Qwen2.5-7B-Instruct",
-            task="text-generation",
-            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN")
-        )
-        return ChatHuggingFace(llm=hf_llm)
+        # hf_llm = HuggingFaceEndpoint(
+        #     repo_id="Qwen/Qwen2.5-7B-Instruct",
+        #     task="text-generation",
+        #     huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN")
+        # )
+        # return ChatHuggingFace(llm=hf_llm)
           
         #  return ChatOpenAI(
         #              model="openrouter/free",
         #              base_url="https://openrouter.ai/api/v1",
         #              api_key=os.getenv('OPENROUTER_API_KEY', 'MISSING_KEY')
         #          )
+
+
+        from langchain_deepseek import ChatDeepSeek
+        return ChatDeepSeek(
+            api_key = os.getenv("DEEPSEEK_API_KEY"),
+            model="deepseek-chat",
+            temperature=0
+        )
         
     # Heavy Tool Calling & Coding
     elif role == "specialist":
-        hf_llm = HuggingFaceEndpoint(
-            repo_id="Qwen/Qwen2.5-7B-Instruct",
-            task="text-generation",
-            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN")
-        )
-        return ChatHuggingFace(llm=hf_llm)
+        # hf_llm = HuggingFaceEndpoint(
+        #     repo_id="Qwen/Qwen2.5-7B-Instruct",
+        #     task="text-generation",
+        #     huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN")
+        # )
+        # return ChatHuggingFace(llm=hf_llm)
         # or use this 
 
         # return ChatOpenAI(
@@ -70,11 +78,25 @@ def get_llm(role: str = "default", model: str | None = None, provider: str | Non
         #     base_url="https://openrouter.ai/api/v1",
         # )
 
+        from langchain_deepseek import ChatDeepSeek
+        return ChatDeepSeek(
+            api_key = os.getenv("DEEPSEEK_API_KEY"),
+            model="deepseek-chat",
+            temperature=0
+        )
+
     # 3. CRAG & Self-RAG Evaluators (0.20s) - Extremely logical and fast document grading
     elif role == "evaluator":
-        return ChatGroq(
-            model="qwen/qwen3.6-27b",
-            api_key=os.getenv('GROQ_API_KEY', 'MISSING_KEY')
+        # return ChatGroq(
+        #     model="qwen/qwen3.6-27b",
+        #     api_key=os.getenv('GROQ_API_KEY', 'MISSING_KEY')
+        # )
+
+        from langchain_deepseek import ChatDeepSeek
+        return ChatDeepSeek(
+            api_key = os.getenv("DEEPSEEK_API_KEY"),
+            model="deepseek-chat",
+            temperature=0
         )
         
     # 4. Security Guardrails (0.22s) - Checks for prompt injection/jailbreaks
@@ -86,12 +108,19 @@ def get_llm(role: str = "default", model: str | None = None, provider: str | Non
 
     # 5. Background Memory Summarizer
     elif role == "memory":
-        hf_llm = HuggingFaceEndpoint(
-            repo_id="Qwen/Qwen2.5-7B-Instruct",
-            task="text-generation",
-            huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN")
+        # hf_llm = HuggingFaceEndpoint(
+        #     repo_id="Qwen/Qwen2.5-7B-Instruct",
+        #     task="text-generation",
+        #     huggingfacehub_api_token=os.getenv("HUGGINGFACEHUB_ACCESS_TOKEN")
+        # )
+        # return ChatHuggingFace(llm=hf_llm)
+
+        from langchain_deepseek import ChatDeepSeek
+        return ChatDeepSeek(
+            api_key = os.getenv("DEEPSEEK_API_KEY"),
+            model="deepseek-chat",
+            temperature=0
         )
-        return ChatHuggingFace(llm=hf_llm)
         
     # 6. Fallback (For manual Overrides)
     _model = model or settings.default_model

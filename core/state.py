@@ -1,5 +1,5 @@
 # ==============================================================
-# core/state.py — Master NexusState
+# core/state.py — Master ImiState
 # ==============================================================
 # The single shared dictionary passed through the entire
 # master graph. Every node reads from and writes back to this.
@@ -21,9 +21,13 @@ from langgraph.graph.message import add_messages
 from langchain_core.messages import AnyMessage
 
 
-class NexusState(TypedDict):
+class ImiState(TypedDict):
     query:          str               # Original user query
     messages:       Annotated[list[AnyMessage], add_messages] # Thread history
     summary:        str               # The rolling conversation summary
     errors:         list[str]         # Errors from any agent
     metadata:       dict[str, Any]    # Optional extra data (timestamps, tokens used, etc.)
+
+
+# Alias for backward compatibility across modules
+NexusState = ImiState

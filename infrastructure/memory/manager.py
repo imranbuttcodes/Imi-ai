@@ -29,7 +29,7 @@ class MemoryManager:
         os.makedirs(settings.memory_dir, exist_ok=True)
         
         # Use provided path or default to the memory_dir
-        self.db_path = db_path or os.path.join(settings.memory_dir, "nexus_archive.db")
+        self.db_path = db_path or os.path.join(settings.memory_dir, "imi_archive.db")
         self._init_archive_db()
 
     def _init_archive_db(self):
@@ -89,11 +89,11 @@ class MemoryManager:
             import os
             import uuid
             
-            semantic_dir = os.path.join(settings.memory_dir, "nexus_semantic_db")
+            semantic_dir = os.path.join(settings.memory_dir, "imi_semantic_db")
             
             # Lazy initialize the Semantic Vector DB cleanly in data/memory
             vectorstore = Chroma(
-                collection_name="nexus_semantic",
+                collection_name="imi_semantic",
                 persist_directory=semantic_dir,
                 embedding_function=get_embeddings()
             )
@@ -116,10 +116,10 @@ class MemoryManager:
             from core.config import settings
             import os
             
-            semantic_dir = os.path.join(settings.memory_dir, "nexus_semantic_db")
+            semantic_dir = os.path.join(settings.memory_dir, "imi_semantic_db")
             
             vectorstore = Chroma(
-                collection_name="nexus_semantic",
+                collection_name="imi_semantic",
                 persist_directory=semantic_dir,
                 embedding_function=get_embeddings()
             )

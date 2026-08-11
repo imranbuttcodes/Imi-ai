@@ -104,7 +104,7 @@ def ingest_all():
     """
     CLI ENTRY POINT: Scans the entire data/documents folder and processes everything.
     """
-    console.rule("[bold blue]Nexus AI — Document Ingestion[/bold blue]")
+    console.rule("[bold blue]Imi AI — Document Ingestion[/bold blue]")
     
     files = list(DOCUMENTS_DIR.glob("**/*.pdf")) + list(DOCUMENTS_DIR.glob("**/*.txt"))
     if not files:

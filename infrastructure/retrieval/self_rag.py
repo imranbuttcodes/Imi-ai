@@ -1,7 +1,7 @@
 # ==============================================================
 # infrastructure/retrieval/self_rag.py — Self-RAG Pipeline
 # ==============================================================
-# Your Self-RAG pipeline adapted for Nexus AI.
+# Your Self-RAG pipeline adapted for Imi AI.
 #
 # Flow:
 #   should_retrieve → NO  → generate_direct → END

@@ -10,10 +10,10 @@
 # ==============================================================
 
 from langgraph.graph import END
-from core.state import NexusState
+from core.state import ImiState
 from core.registry import registry
 
-def route_request(state: NexusState) -> str:
+def route_request(state: ImiState) -> str:
     """
     Decides the next node in the master graph based on Main AI's decision.
     """

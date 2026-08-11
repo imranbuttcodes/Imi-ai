@@ -1,7 +1,7 @@
 # ==============================================================
 # infrastructure/retrieval/crag.py — Corrective RAG Pipeline
 # ==============================================================
-# Your CRAG pipeline adapted for Nexus AI.
+# Your CRAG pipeline adapted for Imi AI.
 #
 # Flow:
 #   retrieve → eval_each_doc → (CORRECT → refine)

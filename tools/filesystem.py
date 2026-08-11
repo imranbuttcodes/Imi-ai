@@ -11,7 +11,7 @@ def delete_path(path: str) -> str:
     """
     # Yield control back to the state machine for explicit human approval
     confirmation = interrupt(
-        f"\n[WARNING] The Nexus AI is requesting to delete the following path:\n"
+        f"\n[WARNING] The Imi AI is requesting to delete the following path:\n"
         f"Path: {path}\n"
         f"Do you approve this deletion? (y/n): "
     )

@@ -1,7 +1,7 @@
 # ==============================================================
-# graphs/nexus_graph.py — The Master Graph
+# graphs/imi_graph.py — The Master Graph
 # ==============================================================
-# This is the blueprint for the entire Nexus AI system.
+# This is the blueprint for the entire Imi AI system.
 # It wires the Main AI to all the specialist agents dynamically.
 #
 # If you add a new agent to the registry, this graph will
@@ -11,11 +11,11 @@
 
 from langgraph.graph import StateGraph, START, END
 from langgraph.prebuilt import ToolNode
-from core.state import NexusState
+from core.state import ImiState
 from core.main_ai import main_ai_node, build_agent_tools
 from core.registry import discover_agents
 
-def route_after_main(state: NexusState) -> str:
+def route_after_main(state: ImiState) -> str:
     """
     Decides whether to route to the Tools node or finish the turn.
     """
@@ -44,7 +44,7 @@ def build_master_graph():
     discover_agents()
     
     # 2. Initialize the master graph state
-    graph = StateGraph(NexusState)
+    graph = StateGraph(ImiState)
 
     # 3. Add the Main AI (the ReAct Orchestrator)
     graph.add_node("main_ai", main_ai_node)
@@ -76,7 +76,7 @@ def build_master_graph():
     from langgraph.checkpoint.sqlite import SqliteSaver
     
     os.makedirs(settings.memory_dir, exist_ok=True)
-    working_db_path = os.path.join(settings.memory_dir, "nexus_working.db")
+    working_db_path = os.path.join(settings.memory_dir, "imi_working.db")
     conn = sqlite3.connect(working_db_path, check_same_thread=False)
     checkpointer = SqliteSaver(conn)
     

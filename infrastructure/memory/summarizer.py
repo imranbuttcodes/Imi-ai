@@ -16,14 +16,14 @@ except ImportError:
     def count_tokens_approximately(msgs):
         return sum(len(str(m.content)) // 4 for m in msgs)
 
-from core.state import NexusState
+from core.state import ImiState
 from infrastructure.memory.manager import memory_manager, MemoryType
 from infrastructure.llm.factory import get_llm
 
 MAX_CONTEXT_TOKENS = 4000  # Limit before we trigger summarization (Adjustable)
 
 
-def summarize_node(state: NexusState) -> dict:
+def summarize_node(state: ImiState) -> dict:
     """
     Checks token count. If over MAX_CONTEXT_TOKENS, it:
     1. Archives old messages

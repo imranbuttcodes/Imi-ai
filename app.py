@@ -1,7 +1,7 @@
 # ==============================================================
 # app.py — The Terminal Interface
 # ==============================================================
-# Run this file to chat with Nexus AI.
+# Run this file to chat with Imi AI.
 # It boots up the master graph and provides a CLI loop.
 # ==============================================================
 
@@ -17,7 +17,6 @@ try:
     import defusedxml
     import defusedxml.ElementTree
     import defusedxml.minidom
-    import defusedxml.cElementTree
 finally:
     os.chdir(_old_cwd)
 
@@ -25,7 +24,7 @@ from rich.console import Console
 from rich.panel import Panel
 from rich.markdown import Markdown
 from core.config import settings
-from graphs.nexus_graph import build_master_graph
+from graphs.imi_graph import build_master_graph
 
 console = Console()
 
@@ -53,7 +52,7 @@ def main():
                 continue
                 
             if user_input.lower() in ['exit', 'quit', 'q']:
-                console.print("[dim]Shutting down Nexus AI... Goodbye.[/dim]")
+                console.print("[dim]Shutting down Imi AI... Goodbye.[/dim]")
                 break
 
             # Prepare the state update
@@ -67,10 +66,10 @@ def main():
             }
             
             # Use a consistent thread_id for persistence across boots
-            config = {"configurable": {"thread_id": "nexus_default_user"}}
+            config = {"configurable": {"thread_id": "imi_default_user"}}
 
             # 3. Run the graph with streaming for live debugging traces
-            with console.status("[dim]Nexus AI is thinking...[/dim]", spinner="dots"):
+            with console.status("[dim]Imi AI is thinking...[/dim]", spinner="dots"):
                 for event in app.stream(update_state, config=config):
                     for node_name, state_update in event.items():
                         console.print(f"[dim]  [Graph Trace] Finished node: [bold]{node_name}[/bold][/dim]")
@@ -96,7 +95,7 @@ def main():
             threading.Thread(target=extract_and_store_facts, args=(messages_snapshot,), daemon=True).start()
 
         except KeyboardInterrupt:
-            console.print("\n[dim]Shutting down Nexus AI... Goodbye.[/dim]")
+            console.print("\n[dim]Shutting down Imi AI... Goodbye.[/dim]")
             break
         except Exception as e:
             console.print(f"\n[bold red]Error:[/bold red] {e}\n")

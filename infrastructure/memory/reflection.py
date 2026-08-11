@@ -53,7 +53,7 @@ Analyze the following recent conversation snippet.
 
 Did the user explicitly state any NEW, PERMANENT facts about themselves?
 Examples of permanent facts:
-- "I am building Nexus AI"
+- "I am building Imi AI"
 - "I code in Python and Windows"
 - "I prefer dark mode"
 - "I work as a software engineer"

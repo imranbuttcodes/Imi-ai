@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Nexus AI Technical Architecture</title>
+    <title>Imi AI Technical Architecture</title>
     <style>
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; display: flex; margin: 0; height: 100vh; background-color: #0d1117; color: #c9d1d9; }
         #graph-container { flex: 2; padding: 20px; overflow: auto; border-right: 1px solid #30363d; }
@@ -83,14 +83,14 @@
             MainAI: {
                 title: "Main AI Router",
                 file: "core/main_ai.py",
-                func: "def main_ai_node(state: NexusState)",
+                func: "def main_ai_node(state: ImiState)",
                 desc: "The entry point of the Master Graph. It dynamically calls AgentRegistry.list_all() to inject descriptions of all registered agents into the system prompt. It uses an LLM with structured output to decide the routing target."
             },
             KnowledgeAgent: {
                 title: "Knowledge Agent",
                 file: "agents/knowledge/agent.py",
                 func: "class KnowledgeAgent(BaseAgent)",
-                desc: "Wraps the internal knowledge subgraph. It transforms the global NexusState into a private KnowledgeState, invokes its internal StateGraph, and maps the final answer back to NexusState."
+                desc: "Wraps the internal knowledge subgraph. It transforms the global ImiState into a private KnowledgeState, invokes its internal StateGraph, and maps the final answer back to ImiState."
             },
             ResearchAgent: {
                 title: "Research Agent",

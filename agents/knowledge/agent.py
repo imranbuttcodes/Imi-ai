@@ -6,14 +6,14 @@
 #
 # Responsibilities:
 #   1. Define name, description, capabilities (for registry)
-#   2. Transform NexusState → KnowledgeState (input)
+#   2. Transform ImiState → KnowledgeState (input)
 #   3. Run the internal graph
-#   4. Transform KnowledgeState → NexusState update (output)
+#   4. Transform KnowledgeState → ImiState update (output)
 # ==============================================================
 
 from agents.base import BaseAgent
 from agents.knowledge.graph import build_knowledge_graph
-from core.state import NexusState
+from core.state import ImiState
 from core.constants import AgentName
 
 
@@ -26,17 +26,17 @@ class KnowledgeAgent(BaseAgent):
         self._graph = build_knowledge_graph()
         super().__init__()   # triggers auto-registration in registry
 
-    def run(self, nexus_state: NexusState) -> dict:
+    def run(self, imi_state: ImiState) -> dict:
         """
         Entry point called by the master graph.
 
-        Transforms NexusState → KnowledgeState,
+        Transforms ImiState → KnowledgeState,
         runs the internal pipeline,
-        transforms result → NexusState partial update.
+        transforms result → ImiState partial update.
         """
         # ── Input Transform ────────────────────────────────────
         agent_state = {
-            "query":            nexus_state["query"],
+            "query":            imi_state["query"],
             "retrieved_chunks": [],
             "answer":           "",
         }

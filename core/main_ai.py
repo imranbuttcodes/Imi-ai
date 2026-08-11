@@ -1,7 +1,7 @@
 from langchain_core.tools import tool
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
 from langchain_core.messages import SystemMessage
-from core.state import NexusState
+from core.state import ImiState
 from core.registry import registry
 from infrastructure.llm.factory import get_llm
 from infrastructure.memory.manager import memory_manager
@@ -15,14 +15,17 @@ def _create_agent_tool(entry):
     agent_name = entry.name
     
     def agent_tool_func(query: str) -> str:
-        state = {"query": query, "messages": [("user", query)]}
-        result = agent_instance.run(state)
-        raw_output = result.get("agent_outputs", {}).get(agent_name, "Task completed but no output returned.")
-        
-        # TRUNCATION FIX: Prevent massive file reads from blowing up the context window!
-        if isinstance(raw_output, str) and len(raw_output) > 10000:
-            return raw_output[:10000] + "\n\n...[OUTPUT TRUNCATED TO PREVENT CONTEXT WINDOW EXPLOSION]..."
-        return raw_output
+        try:
+            state = {"query": query, "messages": [("user", query)]}
+            result = agent_instance.run(state)
+            raw_output = result.get("agent_outputs", {}).get(agent_name, "Task completed but no output returned.")
+            
+            # TRUNCATION FIX: Prevent massive file reads from blowing up the context window!
+            if isinstance(raw_output, str) and len(raw_output) > 10000:
+                return raw_output[:10000] + "\n\n...[OUTPUT TRUNCATED TO PREVENT CONTEXT WINDOW EXPLOSION]..."
+            return raw_output
+        except Exception as e:
+            return f"Error executing {agent_name} agent: {str(e)}"
         
     # Standardize the function name and docstring for LangChain Tool
     agent_tool_func.__name__ = f"call_{agent_name}_agent"
@@ -44,14 +47,14 @@ def build_agent_tools() -> list:
         tools.append(_create_agent_tool(entry))
     return tools
 
-def main_ai_node(state: NexusState) -> dict:
+def main_ai_node(state: ImiState) -> dict:
     """
     The master Orchestrator node using a ReAct loop.
     It binds the agent tools and decides whether to use them or respond to the user.
     """
     tools = build_agent_tools()
     
-    system_prompt = """You are the Nexus Main AI Orchestrator.
+    system_prompt = """You are the Imi Main AI Orchestrator.
 Your job is to analyze the user's request and fulfill it.
 If you need to perform actions (like web search, file reads, or memory retrieval), you MUST use the available tools.
 You can use tools sequentially to gather information before answering.
