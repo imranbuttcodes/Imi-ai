@@ -1,4 +1,4 @@
-# Imi AI — Multi-Agent Operating System
+# Imi AI — Multi-Agent AI Assistant
 
 [![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
 [![Framework](https://img.shields.io/badge/Framework-LangGraph%20%7C%20LangChain-orange.svg)](https://www.langchain.com/)
